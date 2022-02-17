@@ -2,6 +2,6 @@
  (public_name xmelly)
  (modules xmelly))
 (executable
- (public_name xmldump)
+ (name xmldump)
  (modules xmldump)
  (libraries xmelly))
