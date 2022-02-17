@@ -1,0 +1,7 @@
+(library
+ (name xmelly)
+ (modules xmelly))
+(executable
+ (name xmldump)
+ (modules xmldump)
+ (libraries xmelly))
