@@ -1,5 +1,5 @@
 (library
- (name xmelly)
+ (public_name xmelly)
  (modules xmelly))
 (executable
  (name xmldump)
