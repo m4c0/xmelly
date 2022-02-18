@@ -39,7 +39,11 @@ let take ((line, cl, ic) : lc_channel) : char option =
   | c :: cs -> cl := cs; Some c
   | [] ->
       let co = safe_input_char ic in
-      let is_nl = Option.map (fun c -> c = '\n') co |> Option.value ~default:false in
+      let is_nl = match co with
+        | Some '\n' -> true
+        | Some _
+        | None -> false
+      in
       line := if is_nl then !line + 1 else !line;
       co
 
