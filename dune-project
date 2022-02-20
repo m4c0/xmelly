@@ -2,6 +2,7 @@
 (name xmelly)
 (version 1.0.0)
 
+(cram enable)
 (generate_opam_files true)
 
 (source (github m4c0/xmelly))
