@@ -144,7 +144,7 @@ let rec match_node (tag : string) (lc : lc_channel) : t =
   then Element (tag, attrs, [])
   else Element (tag, attrs, node_kids tag lc)
 and node_kids tag (lc : lc_channel) =
-  match next_nonblank_token lc with
+  match next_token lc with
   | LT -> begin
     match next_token lc with
     | Slash ->
@@ -156,7 +156,16 @@ and node_kids tag (lc : lc_channel) =
         child :: node_kids tag lc
     | _ -> fail lc
   end
-  | Ident t -> Text t :: node_kids tag lc
+  | Ident t -> begin
+    match node_kids tag lc with
+    | Text tt :: ll -> Text (t ^ tt) :: ll
+    | ll -> Text t :: ll
+  end
+  | Space -> begin
+    match node_kids tag lc with
+    | Text tt :: ll -> Text (" " ^ tt) :: ll
+    | ll -> Text " " :: ll
+  end
   | _ -> fail lc
 
 let parse (ic : in_channel) : t =
