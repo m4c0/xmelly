@@ -10,7 +10,6 @@ type token =
   | EQ
   | Slash
   | QMark
-  | Excl
   | Space
   | Ident of string
   | Value of string
@@ -24,7 +23,6 @@ let is_ident : char -> bool = function
   | '?'
   | '='
   | '/'
-  | '!'
   | ' '
   | '\n'
   | '"' -> false
@@ -70,7 +68,6 @@ let next_token (lc : lc_channel) : token =
   | Some('/') -> Slash
   | Some('?') -> QMark
   | Some('=') -> EQ
-  | Some('!') -> Excl
   | Some(' ')
   | Some('\n') -> 
       consume lc (function

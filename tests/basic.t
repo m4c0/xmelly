@@ -5,3 +5,9 @@
   hello:
     world:
       test
+
+  $ cat | ./xmldump.exe <<EOF
+  > <?xml version="1.0" ?>
+  > <hello>!!</hello>
+  hello:
+    !!
