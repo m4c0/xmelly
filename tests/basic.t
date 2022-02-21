@@ -57,3 +57,9 @@ Can we ignore comments with dashes?
   hello:
     [ ]
 
+Can we process empty tags?
+  $ cat | ./xmldump.exe <<EOF
+  > <?xml version="1.0" ?>
+  > <hello/>
+  hello:
+

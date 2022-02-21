@@ -57,7 +57,7 @@ let rec match_node (tag : string) (lc : lc_channel) : t =
     | GT ->
         ([], false)
     | Slash -> 
-        match_token LT lc |> ignore;
+        match_token GT lc |> ignore;
         ([], true)
     | _ -> fail lc
   in
