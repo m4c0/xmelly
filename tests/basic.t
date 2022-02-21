@@ -34,7 +34,7 @@ Can we mix spaces in text?
   > <?xml version="1.0" ?>
   > <hello>i   am   groot   !   !</hello>
   hello:
-    i am groot ! !
+    i   am   groot   !   !
 
 Can use use paths in text?
   $ cat | ./xmldump.exe <<EOF
@@ -63,3 +63,9 @@ Can we process empty tags?
   > <hello/>
   hello:
 
+Can we do arbitraty texts?
+  $ cat | ./xmldump.exe <<EOF
+  > <?xml version="1.0" ?>
+  > <hello>this "test" should work</hello>
+  hello:
+    this "test" should work

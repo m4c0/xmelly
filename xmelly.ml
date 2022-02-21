@@ -65,13 +65,9 @@ let rec match_node (tag : string) (lc : lc_channel) : t =
   if closed
   then Element (tag, attrs, [])
   else Element (tag, attrs, node_kids tag lc)
-and build_text t tag lc =
-  match node_kids tag lc with
-  | Text tt :: ll -> Text (t ^ tt) :: ll
-  | ll -> Text t :: ll
 and node_kids tag (lc : lc_channel) =
-  match next_token lc with
-  | LT -> begin
+  let t = consume lc (fun c -> c <> '<') in
+  let kids_after_lt () =
     match next_token lc with
     | Slash ->
         match_token (Ident tag) lc |> ignore;
@@ -81,11 +77,21 @@ and node_kids tag (lc : lc_channel) =
         let child = match_node t lc in
         child :: node_kids tag lc
     | _ -> fail lc
-  end
-  | Ident t -> build_text t tag lc
-  | Space -> build_text " " tag lc
-  | Slash -> build_text "/" tag lc
-  | _ -> fail lc
+  in
+  let merge_text t kids =
+    match kids with
+    | Text tt :: ks -> Text (t ^ tt) :: ks
+    | ks -> Text t :: ks
+  in
+  let kids =
+    match next_token lc with
+    | LT -> kids_after_lt ()
+    | Space -> merge_text " " (node_kids tag lc)
+    | _ -> fail lc
+  in 
+  if t = "" 
+  then kids
+  else merge_text t kids
 
 let parse (ic : in_channel) : t =
   let lc : lc_channel = (ref 1, ref [], ic) in

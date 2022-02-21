@@ -67,7 +67,7 @@ let rec consume (lc : lc_channel) (fn : char -> bool) : string =
 let fail_with (lc : lc_channel) (msg : string) =
   let rem = consume lc (fun c -> c <> '\n') in
   let (line, _, _) = lc in
-  let msg = Printf.sprintf "line %d: %s near %s" (!line - 1) msg rem in
+  let msg = Printf.sprintf "line %d: %s near [%s]" (!line - 1) msg rem in
   failwith msg
 
 let fail (lc : lc_channel) = fail_with lc "invalid input"
