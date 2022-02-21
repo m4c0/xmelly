@@ -39,7 +39,22 @@ let take ((line, cl, ic) : lc_channel) : char option =
       line := if is_nl then !line + 1 else !line;
       co
 
-let undo ((_, cl, _) : lc_channel) (c : char) : unit = cl := c :: !cl
+let rec take_n (n : int) (lc : lc_channel) : char list =
+  match n with
+  | 0 -> []
+  | nn ->
+      match take lc with
+      | None -> []
+      | Some c -> c :: take_n (nn - 1) lc
+
+let undo ((_, cl, _) : lc_channel) (c : char) (res : 'a) : 'a = 
+  cl := c :: !cl;
+  res
+
+let rec undo_n (lc : lc_channel) (cs : char list) (res : 'a) : 'a =
+  match cs with
+  | [] -> res
+  | c :: cc -> undo_n lc cc res |> undo lc c
 
 let rec consume (lc : lc_channel) (fn : char -> bool) : string =
   match take lc with
@@ -47,17 +62,32 @@ let rec consume (lc : lc_channel) (fn : char -> bool) : string =
   | Some c -> 
       if fn c
       then ((String.make 1 c) ^ (consume lc fn))
-      else (undo lc c; "")
+      else undo lc c ""
 
-let fail (lc : lc_channel) =
+let fail_with (lc : lc_channel) (msg : string) =
   let rem = consume lc (fun c -> c <> '\n') in
   let (line, _, _) = lc in
-  let msg = Printf.sprintf "line %d: invalid input near %s" (!line - 1) rem in
+  let msg = Printf.sprintf "line %d: %s near %s" (!line - 1) msg rem in
   failwith msg
+
+let fail (lc : lc_channel) = fail_with lc "invalid input"
+
+let rec consume_until_endcomment (lc : lc_channel) : token =
+  match take_n 3 lc with
+  | ['-';'-';'>'] -> Space
+  | [_;a;b] ->
+      undo lc b () |> undo lc a;
+      consume_until_endcomment lc
+  | _ -> failwith "comment wasn't closed"
 
 let next_token (lc : lc_channel) : token =
   match take lc with
-  | Some('<') -> LT
+  | Some('<') -> (
+      match take_n 3 lc with
+      | ['!';'-';'-'] -> consume_until_endcomment lc
+      | '!' :: xs -> undo_n lc xs LT (* TODO: doctype *)
+      | xs -> undo_n lc xs LT
+  )
   | Some('>') -> GT
   | Some('/') -> Slash
   | Some('?') -> QMark

@@ -42,3 +42,18 @@ Can use use paths in text?
   > <hello>../relative/path.txt</hello>
   hello:
     ../relative/path.txt
+
+Can we ignore comments?
+  $ cat | ./xmldump.exe <<EOF
+  > <?xml version="1.0" ?>
+  > <hello>[<!-- yeah -->]</hello>
+  hello:
+    [ ]
+
+Can we ignore comments with dashes?
+  $ cat | ./xmldump.exe <<EOF
+  > <?xml version="1.0" ?>
+  > <hello>[<!-- - yeah - -->]</hello>
+  hello:
+    [ ]
+
