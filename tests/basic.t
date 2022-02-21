@@ -34,7 +34,16 @@ Can we mix spaces in text?
   > <?xml version="1.0" ?>
   > <hello>i   am   groot   !   !</hello>
   hello:
-    i   am   groot   !   !
+    i am groot ! !
+
+Do we merge consecutive spaces?
+  $ cat | ./xmldump.exe <<EOF
+  > <?xml version="1.0" ?>
+  > <hello>[
+  >   world
+  > ]</hello>
+  hello:
+    [ world ]
 
 Can use use paths in text?
   $ cat | ./xmldump.exe <<EOF
