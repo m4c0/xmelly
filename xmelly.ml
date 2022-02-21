@@ -81,13 +81,13 @@ and node_kids tag (lc : lc_channel) =
   in
   let merge_text t kids =
     match kids with
-    | Text tt :: ks -> Text (t ^ tt) :: ks
+    | Text tt :: ks -> Text (t ^ " " ^ tt) :: ks
     | ks -> Text t :: ks
   in
   let kids =
     match next_token lc with
     | LT -> kids_after_lt ()
-    | Space -> merge_text " " (node_kids tag lc)
+    | Space -> node_kids tag lc
     | _ -> fail lc
   in 
   if t = "" 

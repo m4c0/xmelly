@@ -45,6 +45,24 @@ Do we merge consecutive spaces?
   hello:
     [ world ]
 
+Do we strip spaces between text?
+  $ cat | ./xmldump.exe <<EOF
+  > <?xml version="1.0" ?>
+  > <hello>
+  >   world
+  > </hello>
+  hello:
+    world
+
+Do we strip spaces between tags?
+  $ cat | ./xmldump.exe <<EOF
+  > <?xml version="1.0" ?>
+  > <hello>
+  >   <world/>
+  > </hello>
+  hello:
+    world:
+
 Can use use paths in text?
   $ cat | ./xmldump.exe <<EOF
   > <?xml version="1.0" ?>
