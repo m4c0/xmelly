@@ -7,6 +7,7 @@ type token =
   | Space
   | Ident of string
   | Value of string
+  | CData of string
   | Eof
 
 type lc_channel = int ref * char list ref * in_channel
@@ -70,8 +71,6 @@ let fail_with (lc : lc_channel) (msg : string) =
   let msg = Printf.sprintf "line %d: %s near [%s]" (!line - 1) msg rem in
   failwith msg
 
-let fail (lc : lc_channel) = fail_with lc "invalid input"
-
 let rec consume_until_endcomment (lc : lc_channel) : token =
   match take_n 3 lc with
   | ['-';'-';'>'] -> Space
@@ -80,11 +79,29 @@ let rec consume_until_endcomment (lc : lc_channel) : token =
       consume_until_endcomment lc
   | _ -> failwith "comment wasn't closed"
 
+let rec consume_until_endcdata (lc : lc_channel) : char list =
+  match take_n 3 lc with
+  | [']';']';'>'] -> []
+  | [a;b;c] ->
+      undo lc c () |> undo lc b;
+      a :: consume_until_endcdata lc
+  | _ -> failwith "cdata wasn't closed"
+
+let consume_cdata (lc : lc_channel) : token =
+  match take_n 5 lc with
+  | ['D';'A';'T';'A';'['] ->
+      let v = consume_until_endcdata lc |> List.to_seq |> String.of_seq in
+      CData v
+  | x ->
+      undo_n lc x ();
+      fail_with lc "expecting CDATA"
+
 let next_token (lc : lc_channel) : token =
   match take lc with
   | Some('<') -> (
       match take_n 3 lc with
       | ['!';'-';'-'] -> consume_until_endcomment lc
+      | ['!';'[';'C'] -> consume_cdata lc
       | '!' :: xs -> undo_n lc xs LT (* TODO: doctype *)
       | xs -> undo_n lc xs LT
   )

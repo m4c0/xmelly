@@ -6,6 +6,8 @@ type t =
 
 open Tokeniser
 
+let fail (lc : lc_channel) = fail_with lc "invalid input"
+
 let rec next_nonblank_token (lc : lc_channel) : token =
   match next_token lc with
   | Space -> next_nonblank_token lc
@@ -39,7 +41,7 @@ let match_preamble (lc : lc_channel) : unit =
     | QMark ->
         match_token GT lc |> ignore;
         []
-    | _ -> fail lc
+    | _ -> fail_with lc "expecting ident or '?' after '<' in preamble"
   in
   match_nonblank_token LT lc |> ignore;
   match_token QMark lc |> ignore;
@@ -59,7 +61,7 @@ let rec match_node (tag : string) (lc : lc_channel) : t =
     | Slash -> 
         match_token GT lc |> ignore;
         ([], true)
-    | _ -> fail lc
+    | _ -> fail_with lc "expecting attribute name or '>' or '/' after tag opening"
   in
   let (attrs, closed) = attrs () in
   if closed
@@ -77,7 +79,7 @@ and node_kids tag (lc : lc_channel) =
     | Ident t ->
         let child = match_node t lc in
         child :: node_kids tag lc
-    | _ -> fail lc
+    | _ -> fail_with lc "expecting tag name or '/' after '<'"
   in
   let merge_text t kids =
     match kids with
@@ -88,7 +90,8 @@ and node_kids tag (lc : lc_channel) =
     match next_token lc with
     | LT -> kids_after_lt ()
     | Space -> node_kids tag lc
-    | _ -> fail lc
+    | CData x -> merge_text x (node_kids tag lc)
+    | _ -> fail_with lc "expecting '<' or spaces inside a tag"
   in 
   if t = "" 
   then kids

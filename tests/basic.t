@@ -106,3 +106,11 @@ Can we do arbitraty texts?
   > EOF
   hello:
     this "test" should work
+
+Do we support CDATA?
+  $ ./xmldump.exe <<EOF
+  > <?xml version="1.0" ?>
+  > <cdata><![CDATA[cdata works fine]]></cdata>
+  > EOF
+  cdata:
+    cdata works fine
