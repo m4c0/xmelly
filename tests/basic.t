@@ -119,3 +119,8 @@ Do we support XML without preamble?
   $ echo '<yeah/>' | ./xmldump.exe
   yeah:
 
+Do we support tabs?
+  $ echo '<yeah>[\n\t\n\t\n]</yeah>' | ./xmldump.exe
+  yeah:
+    [ ]
+
