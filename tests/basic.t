@@ -114,3 +114,8 @@ Do we support CDATA?
   > EOF
   cdata:
     cdata works fine
+
+Do we support XML without preamble?
+  $ echo '<yeah/>' | ./xmldump.exe
+  yeah:
+

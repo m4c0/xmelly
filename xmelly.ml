@@ -41,14 +41,12 @@ let match_preamble (lc : lc_channel) : unit =
     | QMark ->
         match_token GT lc |> ignore;
         []
-    | _ -> fail_with lc "expecting ident or '?' after '<' in preamble"
+    | _ -> fail_with lc "expecting ident or '?' in preamble"
   in
-  match_nonblank_token LT lc |> ignore;
-  match_token QMark lc |> ignore;
   match_nonblank_token (Ident "xml") lc |> ignore;
   attrs () |> ignore
 
-let rec match_node (tag : string) (lc : lc_channel) : t =
+let rec match_node (lc : lc_channel) (tag : string) : t =
   let rec attrs () =
     match next_nonblank_token lc with
     | Ident k ->
@@ -77,7 +75,7 @@ and node_kids tag (lc : lc_channel) =
         match_nonblank_token GT lc |> ignore;
         []
     | Ident t ->
-        let child = match_node t lc in
+        let child = match_node lc t in
         child :: node_kids tag lc
     | _ -> fail_with lc "expecting tag name or '/' after '<'"
   in
@@ -99,8 +97,15 @@ and node_kids tag (lc : lc_channel) =
 
 let parse (ic : in_channel) : t =
   let lc : lc_channel = (ref 1, ref [], ic) in
-  match_preamble lc;
   let _ = match_nonblank_token LT lc in
-  let tag = match_ident lc in
-  match_node tag lc
+  let tag = 
+    match next_token lc with
+    | QMark ->
+        match_preamble lc;
+        match_nonblank_token LT lc |> ignore;
+        match_ident lc
+    | Ident x -> x
+    | _ -> fail_with lc "expecing tag or <?xml at the beginning of the file"
+  in
+  match_node lc tag
 
