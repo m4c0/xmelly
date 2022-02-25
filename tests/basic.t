@@ -124,8 +124,11 @@ Do we support tabs?
   yeah:
     [ ]
 
-Do we support Windows-style line breaks?
-  $ echo '<yeah>[\n\r\n\r\n]</yeah>' | ./xmldump.exe
+Do we ignore spaces before real content?
+  $ echo "<yeah><tab>\t|\t</tab><crlf>\r\n|\r\n</crlf></yeah>" | ./xmldump.exe
   yeah:
-    [ ]
+    tab:
+      |
+    crlf:
+      |
 

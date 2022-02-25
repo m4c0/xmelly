@@ -66,7 +66,7 @@ let rec match_node (lc : lc_channel) (tag : string) : t =
   then Element (tag, attrs, [])
   else Element (tag, attrs, node_kids tag lc)
 and node_kids tag (lc : lc_channel) =
-  let is_text = function '<' | ' ' | '\n' -> false | _ -> true in
+  let is_text = function '<' | ' ' | '\t' | '\r' | '\n' -> false | _ -> true in
   let t = consume lc is_text in
   let kids_after_lt () =
     match next_token lc with
