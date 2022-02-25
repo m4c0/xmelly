@@ -109,11 +109,9 @@ let next_token (lc : lc_channel) : token =
   | Some('/') -> Slash
   | Some('?') -> QMark
   | Some('=') -> EQ
-  | Some(' ')
-  | Some('\t')
-  | Some('\n') -> 
+  | Some(' ' | '\t' | '\r' | '\n') ->
       consume lc (function
-        | ' ' | '\t' | '\n' -> true
+        | ' ' | '\t' | '\r' | '\n' -> true
         | _ -> false) |> ignore;
       Space
   | Some('"') -> 

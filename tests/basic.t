@@ -124,3 +124,8 @@ Do we support tabs?
   yeah:
     [ ]
 
+Do we support Windows-style line breaks?
+  $ echo '<yeah>[\n\r\n\r\n]</yeah>' | ./xmldump.exe
+  yeah:
+    [ ]
+
