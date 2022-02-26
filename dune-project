@@ -19,4 +19,5 @@
   match you way into the data you want.
 
   The output will strip extra spaces - therefore this library might not be
-  suitable for HTML/SGML parsing."))
+  suitable for HTML/SGML parsing.")
+ (depends (ocaml (>= 4.07.0))))
