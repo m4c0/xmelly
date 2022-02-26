@@ -11,7 +11,7 @@ jobs:
       matrix:
         ocaml-version: # Only use latest and oldest
           - 4.11.0
-          - 4.02.0
+          - 4.07.0
 
     runs-on: ubuntu-latest
 

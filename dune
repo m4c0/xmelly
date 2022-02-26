@@ -1,7 +1,2 @@
 (library
- (public_name xmelly)
- (modules xmelly))
-(executable
- (name xmldump)
- (modules xmldump)
- (libraries xmelly))
+ (public_name xmelly))
