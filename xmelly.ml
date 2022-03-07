@@ -38,13 +38,17 @@ let match_preamble (lc : lc_channel) : unit =
         let _ = match_nonblank_token EQ lc in
         let v = match_value lc in
         (k, v) :: attrs ()
-    | QMark ->
-        match_token GT lc |> ignore;
-        []
-    | _ -> fail_with lc "expecting ident or '?' in preamble"
+    | PIEnd -> []
+    | _ -> fail_with lc "expecting ident or '?>' in preamble"
   in
   match_nonblank_token (Ident "xml") lc |> ignore;
   attrs () |> ignore
+
+let rec discard_pi (lc : lc_channel) =
+  match next_nonblank_token lc with
+  | PIEnd -> []
+  | Eof -> fail_with lc "missing '?>' to finish a process instruction"
+  | _ -> discard_pi lc
 
 let rec match_node (lc : lc_channel) (tag : string) : t =
   let rec attrs () =
@@ -87,9 +91,10 @@ and node_kids tag (lc : lc_channel) =
   let kids =
     match next_token lc with
     | LT -> kids_after_lt ()
+    | PIStart -> discard_pi lc
     | Space -> node_kids tag lc
     | CData x -> merge_text x (node_kids tag lc)
-    | _ -> fail_with lc "expecting '<' or spaces inside a tag"
+    | _ -> fail_with lc "expecting '<', '<?' or spaces inside a tag"
   in 
   if t = "" 
   then kids
@@ -97,15 +102,12 @@ and node_kids tag (lc : lc_channel) =
 
 let parse (ic : in_channel) : t =
   let lc : lc_channel = (ref 1, ref [], ic) in
-  let _ = match_nonblank_token LT lc in
-  let tag = 
-    match next_token lc with
-    | QMark ->
+  let _ = match next_nonblank_token lc with
+    | LT -> ()
+    | PIStart ->
         match_preamble lc;
-        match_nonblank_token LT lc |> ignore;
-        match_ident lc
-    | Ident x -> x
-    | _ -> fail_with lc "expecing tag or <?xml at the beginning of the file"
+        match_nonblank_token LT lc |> ignore
+    | _ -> fail_with lc "expecting tag or <? at the beginning of the file"
   in
-  match_node lc tag
+  match_ident lc |> match_node lc
 

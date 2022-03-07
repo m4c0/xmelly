@@ -1,9 +1,10 @@
 type token =
   | LT
   | GT
+  | PIStart
+  | PIEnd
   | EQ
   | Slash
-  | QMark
   | Space
   | Ident of string
   | Value of string
@@ -96,6 +97,11 @@ let consume_cdata (lc : lc_channel) : token =
       undo_n lc x ();
       fail_with lc "expecting CDATA"
 
+let consume_ident (c : char list) (lc : lc_channel) : token =
+  let s = List.map (String.make 1) c |> String.concat "" in
+  let v = consume lc is_ident in
+  Ident (s ^ v)
+
 let next_token (lc : lc_channel) : token =
   match take lc with
   | Some('<') -> (
@@ -103,11 +109,17 @@ let next_token (lc : lc_channel) : token =
       | ['!';'-';'-'] -> consume_until_endcomment lc
       | ['!';'[';'C'] -> consume_cdata lc
       | '!' :: xs -> undo_n lc xs LT (* TODO: doctype *)
+      | '?' :: xs -> undo_n lc xs PIStart
       | xs -> undo_n lc xs LT
   )
   | Some('>') -> GT
   | Some('/') -> Slash
-  | Some('?') -> QMark
+  | Some('?') -> (
+      match take lc with
+      | Some('>') -> PIEnd
+      | Some(x) -> consume_ident ['?';x] lc
+      | None -> Ident("?")
+  )
   | Some('=') -> EQ
   | Some(' ' | '\t' | '\r' | '\n') ->
       consume lc (function
@@ -118,10 +130,6 @@ let next_token (lc : lc_channel) : token =
       let v = consume lc (fun c -> c <> '"') in
       take lc |> ignore;
       Value v 
-  | Some(c) -> 
-      let s = String.make 1 c in
-      let v = consume lc is_ident in
-      Ident (s ^ v)
+  | Some(c) -> consume_ident [c] lc
   | None -> Eof
-
 

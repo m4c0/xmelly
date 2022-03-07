@@ -132,3 +132,6 @@ Do we ignore spaces before real content?
     crlf:
       |
 
+Do we ignore processing instructions?
+  $ echo "<yeah><?this is a pi?></yeah>" | ./xmldump.exe
+  yeah:
