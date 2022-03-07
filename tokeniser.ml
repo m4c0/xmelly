@@ -21,6 +21,7 @@ let is_ident : char -> bool = function
   | '/'
   | ' '
   | '\n'
+  | '\r'
   | '"' -> false
   | _ -> true
 
@@ -34,7 +35,7 @@ let take ((line, cl, ic) : lc_channel) : char option =
   | [] ->
       let co = safe_input_char ic in
       let is_nl = match co with
-        | Some '\n' -> true
+        | Some '\n' | Some '\r' -> true
         | Some _
         | None -> false
       in
