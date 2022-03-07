@@ -136,3 +136,9 @@ Do we ignore processing instructions?
   $ echo "<yeah><peep><?this is a pi?></peep></yeah>" | ./xmldump.exe
   yeah:
     peep:
+
+Do we accept single/double quotes?
+  $ ./xmldump.exe <<EOF 
+  > <yeah a="'" b='"'/>
+  > EOF
+  yeah a=' b=":

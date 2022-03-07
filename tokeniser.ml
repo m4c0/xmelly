@@ -22,6 +22,7 @@ let is_ident : char -> bool = function
   | ' '
   | '\n'
   | '\r'
+  | '\'' -> false
   | '"' -> false
   | _ -> true
 
@@ -127,6 +128,10 @@ let next_token (lc : lc_channel) : token =
         | ' ' | '\t' | '\r' | '\n' -> true
         | _ -> false) |> ignore;
       Space
+  | Some('\'') -> 
+      let v = consume lc (fun c -> c <> '\'') in
+      take lc |> ignore;
+      Value v 
   | Some('"') -> 
       let v = consume lc (fun c -> c <> '"') in
       take lc |> ignore;
