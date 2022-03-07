@@ -133,5 +133,6 @@ Do we ignore spaces before real content?
       |
 
 Do we ignore processing instructions?
-  $ echo "<yeah><?this is a pi?></yeah>" | ./xmldump.exe
+  $ echo "<yeah><peep><?this is a pi?></peep></yeah>" | ./xmldump.exe
   yeah:
+    peep:

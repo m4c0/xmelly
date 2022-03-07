@@ -46,7 +46,7 @@ let match_preamble (lc : lc_channel) : unit =
 
 let rec discard_pi (lc : lc_channel) =
   match next_nonblank_token lc with
-  | PIEnd -> []
+  | PIEnd -> ()
   | Eof -> fail_with lc "missing '?>' to finish a process instruction"
   | _ -> discard_pi lc
 
@@ -91,7 +91,7 @@ and node_kids tag (lc : lc_channel) =
   let kids =
     match next_token lc with
     | LT -> kids_after_lt ()
-    | PIStart -> discard_pi lc
+    | PIStart -> discard_pi lc; node_kids tag lc
     | Space -> node_kids tag lc
     | CData x -> merge_text x (node_kids tag lc)
     | _ -> fail_with lc "expecting '<', '<?' or spaces inside a tag"
