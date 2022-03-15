@@ -60,13 +60,14 @@ let rec undo_n (lc : lc_channel) (cs : char list) (res : 'a) : 'a =
   | [] -> res
   | c :: cc -> undo_n lc cc res |> undo lc c
 
-let rec consume (lc : lc_channel) (fn : char -> bool) : string =
-  match take lc with
-  | None -> ""
-  | Some c -> 
-      if fn c
-      then ((String.make 1 c) ^ (consume lc fn))
-      else undo lc c ""
+let consume (lc : lc_channel) (fn : char -> bool) : string =
+  let rec aux acc = 
+    match take lc with
+    | None -> acc 
+    | Some c when fn c -> acc ^ (String.make 1 c) |> aux
+    | Some c -> undo lc c acc 
+  in
+  aux ""
 
 let fail_with (lc : lc_channel) (msg : string) =
   let rem = consume lc (fun c -> c <> '\n') in

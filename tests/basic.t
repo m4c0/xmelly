@@ -142,3 +142,9 @@ Do we accept single/double quotes?
   > <yeah a="'" b='"'/>
   > EOF
   yeah a=' b=":
+
+Do we keep children's order?
+  $ echo "<root><one/><two/></root>" | ./xmldump.exe
+  root:
+    one:
+    two:

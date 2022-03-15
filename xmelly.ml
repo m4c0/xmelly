@@ -68,8 +68,8 @@ let rec match_node (lc : lc_channel) (tag : string) : t =
   let (attrs, closed) = attrs () in
   if closed
   then Element (tag, attrs, [])
-  else Element (tag, attrs, node_kids tag lc)
-and node_kids tag (lc : lc_channel) =
+  else Element (tag, attrs, node_kids tag lc [])
+and node_kids tag (lc : lc_channel) acc =
   let is_text = function '<' | ' ' | '\t' | '\r' | '\n' -> false | _ -> true in
   let t = consume lc is_text in
   let kids_after_lt () =
@@ -77,10 +77,10 @@ and node_kids tag (lc : lc_channel) =
     | Slash ->
         match_token (Ident tag) lc |> ignore;
         match_nonblank_token GT lc |> ignore;
-        []
+        acc 
     | Ident t ->
         let child = match_node lc t in
-        child :: node_kids tag lc
+        node_kids tag lc (List.append acc [child])
     | _ -> fail_with lc "expecting tag name or '/' after '<'"
   in
   let merge_text t kids =
@@ -91,9 +91,9 @@ and node_kids tag (lc : lc_channel) =
   let kids =
     match next_token lc with
     | LT -> kids_after_lt ()
-    | PIStart -> discard_pi lc; node_kids tag lc
-    | Space -> node_kids tag lc
-    | CData x -> merge_text x (node_kids tag lc)
+    | PIStart -> discard_pi lc; node_kids tag lc acc
+    | Space -> node_kids tag lc acc
+    | CData x -> merge_text x acc |> node_kids tag lc 
     | _ -> fail_with lc "expecting '<', '<?' or spaces inside a tag"
   in 
   if t = "" 
